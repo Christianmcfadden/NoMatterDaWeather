@@ -26,7 +26,7 @@ Table Of Contents
     * Activate Environment:
         On windows -->   name of environment -->(`"myvenv"\Scripts\activate`) 
         On mac --> (`source "myvenv"/bin/activate`) (Name is in "")
-``
+
     * Install Requirements:
         (`pip install -r requirements.txt`) 
 
@@ -38,6 +38,16 @@ Table Of Contents
     * Mention in request to submit that you need the requirements updated Note the packages added
 
 3. `Clone the GitHub Repository`
+    * Install git
+          Official git site:
+              `https://git-scm.com/downloads/mac`
+          Check Git Version:
+              `git --version`
+          Install Homebrew:
+              `$ brew install git`
+          Install MacPorts (If needed):
+              `$ sudo port install git`
+      
     * Clone the Repositiory:
         (`git clone https://github.com/Christianmcfadden/NoMatterDaWeather.git`)
 
