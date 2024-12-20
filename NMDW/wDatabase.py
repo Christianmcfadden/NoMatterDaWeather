@@ -31,7 +31,6 @@ GET_USERS_BY_NAME = "SELECT * FROM users WHERE fname = ?;"
 DELETE_USER_BY_ID = "DELETE FROM users WHERE userid = ?;"  
 GET_USER_BY_USERNAME = "SELECT * FROM users WHERE username = ?;"
 GET_USER_BY_EMAIL = "SELECT * FROM users WHERE email = ?;"
-UPDATE_USER_RESULTS =  "UPDATE users SET survey = ?, match = ? WHERE userid = ?;"
 
 def create_tables(connection):
     with connection:
