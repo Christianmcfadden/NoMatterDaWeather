@@ -1,12 +1,8 @@
 """
 NoMatterDaWeather (Web App)
-
 Contributers:
 Christian Mcfadden
-
-
 Date Started: 12/7/24
-
 File: Forms.py
 """
 from flask_wtf import FlaskForm
@@ -20,15 +16,25 @@ class UserInfoForm(FlaskForm):
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired()])
+    # add zip
 
-    password = StringField("password", validators=[DataRequired(),Regexp(
+    # use Passwordfield for more security
+    password = PasswordField("password", validators=[DataRequired(),Regexp(
                 r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$',
                 message="Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character, and must be at least 8 characters long."
             )])
     
-    conpassword = StringField("Confirm Password", validators=[DataRequired()])
+    conpassword = PasswordField("Confirm Password", validators=[DataRequired()])
     submit = SubmitField('Next')
 
-    def validate_password(self):
-        if self.password.data != self.conpassword.data:
+    def validate_conpassword(self, conpassword):
+        if self.password.data != conpassword.data:
             raise ValidationError("Passwords must match.")
+    
+    def validate_username(self, username):
+        user = User.query.filter_by(username = username.data).first()
+        if user:
+            raise ValidationError("This username is already taken.")
+
+class UpdatedProfileForm(FlaskForm):
+    # create uodate profile
