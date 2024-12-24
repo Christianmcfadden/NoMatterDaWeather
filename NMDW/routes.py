@@ -23,3 +23,9 @@ from NMDW.methods import *
 def home():
     log_in_form = LoginForm()
     return render_template("login.html", form=log_in_form)
+    
+    
+@app.route('/getZip')
+def zip():
+    zip = "" # add form to get zip
+    return render_template("")
