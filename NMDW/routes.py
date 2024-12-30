@@ -17,7 +17,7 @@ from datetime import datetime, date
 import os
 from werkzeug.utils import secure_filename
 from NMDW.methods import *
-
+from NMDW.forms import *
 # home route
 @app.route('/')
 def home():
@@ -60,5 +60,13 @@ def logout():
 @login_required
 def profile():
     form = UpdatedProfileForm()  # change this in forms.py, get to dashboard
-    if form.validate_on_submit:
-        return
+    if form.validate_on_submit():
+        #update users profile info
+       current_user.username = form.username.data
+       current_user.fname = form.fname.data
+       current_user.lname = form.lname.data
+       current_user.email = form.email.data
+       current_user.zip_code = form.zip_code.data
+       db.session.commit()
+       flash('Your profile has been updated.', 'Success.')
+       return redirect(url_for('dashboard'))
