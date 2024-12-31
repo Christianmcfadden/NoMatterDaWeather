@@ -9,32 +9,22 @@ Date Started: 12/7/24
 
 File: __init__.py
 """
+import dbm
 import os
+from sqlite3 import dbapi2
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
-
-"""
-Create Virtual Environment And Install Requirements
-* You must install the requirements.txt *(IF NEEDED NMDW was mine)
-    * Create Virtual Environment:
-        (python -m venv "myvenv")
-
-    * Activate Environment:
-        On windows -->   name of environment -->`("myvenv"\Scripts\activate`)
-        On mac -->   source ("myvenv"/bin/activate) (Name is in "")
-
-    * Install Requirements:
-        (pip install -r requirements.txt) 
-"""
+from NMDW import routes
+from flask_login import UserMixin
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
 app.debug = True
 
-#I am going to use sql to store user info
+# use sql to store user info
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 db = SQLAlchemy(app)
 
