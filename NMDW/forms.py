@@ -6,10 +6,10 @@ Date Started: 12/7/24
 File: Forms.py
 """
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField
 from wtforms.validators import DataRequired, Regexp, ValidationError
 from NMDW.models import User
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
 from NMDW.models import User
 
 
@@ -57,3 +57,8 @@ class UpdatedProfileForm(FlaskForm):
             user = User.query.filter_by(email=email.data).first()
             if user:
                 raise ValidationError("This email is already registered.")
+
+class LoginForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired()])
+    password = StringField('Password', validators=[DataRequired()])
+    submit = SubmitField('Login')

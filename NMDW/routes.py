@@ -70,3 +70,20 @@ def profile():
        db.session.commit()
        flash('Your profile has been updated.', 'Success.')
        return redirect(url_for('dashboard'))
+
+# route to login
+@app.route('/login', methods = ['GET', 'POST'])
+def login():
+   if current_user.is_authenticated: # logged in users get sent to dashboard
+      return redirect(url_for('dashboard'))
+   form = LoginForm()
+   if form.validate_on_submit():
+      user = User.query.filter_by(email=form.email.data).first()
+      if user and bcrypt.check_password_hash(user.password, form.password.data):
+         login_user(user, remember=form.remember.data)
+         flash('Login successful.', 'Success.')
+         next_page = request.args.get('next') # redirect to intended page
+         return redirect(next_page) if next_page else redirect(url_for('dashboard'))
+      else:
+         flash('Login failed. Check your email and password.')
+   return render_template('login.html', form=form)
