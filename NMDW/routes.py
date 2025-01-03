@@ -24,8 +24,6 @@ from NMDW.forms import *
 # home route
 @app.route('/')
 def home():
-    log_in_form = LoginForm()
-    return render_template("login.html", form=log_in_form)
    if current_user.is_authenticated:
       return redirect(url_for('dashboard'))
    login_form = LoginForm()
