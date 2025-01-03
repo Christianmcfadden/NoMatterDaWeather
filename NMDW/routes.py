@@ -16,6 +16,7 @@ from NMDW.models import User, Post, Flag, Review, ActivityLog
 from flask_login import login_user, current_user, logout_user, login_required
 from datetime import datetime, date
 import os
+import json #NEW 
 from werkzeug.utils import secure_filename
 from NMDW.methods import *
 from NMDW.forms import *
