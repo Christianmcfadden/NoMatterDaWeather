@@ -36,7 +36,3 @@ login_manager.login_view = "login"
 bcrypt = Bcrypt(app)
 
 
-
-from NMDW import routes
-
-
