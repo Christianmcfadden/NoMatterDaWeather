@@ -1,0 +1,20 @@
+/* THIS IS FOR THE SEARCH BAR BUTTON*/
+body {
+    padding: 0;
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: black;
+}
+
+form {
+    text-align: center;
+}
+
+form input[type="search"] {
+    width: 100px;
+    padding: 10px;
+    font-size: 1.2em;
+}
