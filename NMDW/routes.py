@@ -20,15 +20,96 @@ import json #NEW
 from werkzeug.utils import secure_filename
 from NMDW.methods import *
 from NMDW.forms import *
-
+"""
 # home route
 @app.route('/')
-def home():
-   if current_user.is_authenticated:
-      return redirect(url_for('dashboard'))
-   login_form = LoginForm()
-   return render_template("login.html", form = login_form)
+   def home():
+      if current_user.is_authenticated:
+         return redirect(url_for('dashboard'))
+      login_form = LoginForm()
+      return render_template("login.html", form = login_form)
+   
+"""
+# Initial route that loads a search and login options
+@app.route("/") 
+def get_location():
+    user = {
+        'logged' : False
+    }
+    locationData = {
+        'display' : "",
+        'city' : "",
+        'state' : "",
+        'zip' : "",
+        'timezone' : "",
+        'cCode' : "",
+        'provider' : ""
+    }
+    stored_locationData = json.dumps(locationData)
+    session['locationData'] = stored_locationData
+    stored_user = json.dumps(user)
+    session['user'] = stored_user
+    return render_template("FindLocalWeatherPage.html", user=user)
 
+# get zip from user or provide one for them  
+@app.route('/set_location', methods=["POST", "GET"])
+def get_zip():
+    locationData = session['locationData']
+    locationData = json.loads(locationData)
+    user = session['user']
+    user = json.loads(user)
+    zip = request.form.get("zip")
+    if not zip:
+        if locationData['zip'] == "":
+            locationData = get_geolocal()
+            weatherData, locationData = get_weather(locationData)
+            city = createCity(weatherData)
+            return render_template("DetailedWeatherPage.html", locationData=locationData, city=city, user=user)
+        else:
+            weatherData, locationData = get_weather(locationData)
+            city = createCity(weatherData)
+            return render_template("DetailedWeatherPage.html", locationData=locationData, city=city, user=user)
+    else:
+        locationData = {
+                'current_city' : f"{zip}",
+                'zip' : zip,
+                'timezone' : "",
+                'lon' : "",
+                'lat' : ""
+        }
+        weatherData, locationData = get_weather(locationData) 
+        city = createCity(weatherData)
+        return render_template("DetailedWeatherPage.html", locationData=locationData, city=city, user=user)
+
+# This route gets a users current location
+@app.route('/current_location')
+def getCurrentLocal():
+    user = session['user']
+    user = json.loads(user)
+    locationData = get_geolocal()
+    if locationData:
+        weatherData, locationData = get_weather(locationData)
+        city = createCity(weatherData)
+        return render_template("DetailedWeatherPage.html", locationData=locationData, city=city, user=user)
+    else:
+        return render_template("FindLocalWeatherPage.html", user=user)
+
+@app.route('/search_again')
+def find():
+    user = session['user']
+    user = json.loads(user)
+    locationData = {
+        'display' : "",
+        'city' : "",
+        'state' : "",
+        'zip' : "",
+        'timezone' : "",
+        'cCode' : "",
+        'provider' : ""
+    }
+    session['locationData'] = locationData
+    return render_template("FindLocalWeatherPage.html", user=user)
+   
 # registration route
 @app.route('/register', methods = ['GET', 'POST'])
 def register():
