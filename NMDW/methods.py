@@ -11,6 +11,7 @@ File: Methods.py
 """
 
 import requests
+import json
 from datetime import datetime, timedelta
 
 # This function will take in a zip code and get the city name
@@ -34,19 +35,24 @@ def get_geolocal():
         print(f"Error occurred: {e}")
         return {"Error": f"Failed to retrieve location data. Status code: {response.status_code}"}
 
-# Need new api key and link 
+# Get weather checks if locationData is a str or dic and handles it correctly  
 def get_weather(locationData):
     api_key = 'RCFA2FC8DPYXDBMG75A4HRUXC'
     today, sevenDay = getRange()
-    if locationData['display'] == "":
-        locationData = get_location_data(locationData['zip'])
-        url = f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{locationData['zip']}/{today}/{sevenDay}?unitGroup=us&key={api_key}&contentType=json"
+    if isinstance(locationData, str):
+        try:
+            locationData = json.loads(locationData)
+        except json.JSONDecodeError:
+            raise ValueError("locationData is not valid JSON.")
+        
+    if isinstance(locationData, dict) and 'zip' in locationData:
+        zip_code = locationData['zip']
+        locationData = get_location_data(zip_code)
+        url = f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{zip_code}/{today}/{sevenDay}?unitGroup=us&key={api_key}&contentType=json"
         response = requests.get(url)
         return response.json(), locationData
     else:
-        url = f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{locationData['zip']}/{today}/{sevenDay}?unitGroup=us&key={api_key}&contentType=json"
-        response = requests.get(url)
-        return response.json(), locationData
+        raise TypeError("Dictionary doesn't containing a 'zip' key.")
     
 def getCurrentLocal():
     try:
@@ -75,7 +81,7 @@ def getCurrentLocal():
                 'cCode' : "",
                 'provider' : ""
             }
-            print("Error : Empty locationdata variable")
+            print("Error : Empty locationData variable")
             return locationData
 
     except Exception as e:
@@ -118,6 +124,7 @@ def getRange():
     return today, sevenDay
 
 def createCity(weather_data):
+    print(type(weather_data))
     city = {
         'name': weather_data['resolvedAddress'],
         'visibility': weather_data['days'][0]['visibility'],
