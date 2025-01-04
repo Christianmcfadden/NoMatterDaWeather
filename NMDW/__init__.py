@@ -17,7 +17,6 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
-from NMDW import routes
 from flask_login import UserMixin
 
 app = Flask(__name__)
@@ -35,4 +34,4 @@ login_manager.login_view = "login"
 #Encoding integration
 bcrypt = Bcrypt(app)
 
-
+from NMDW import routes
