@@ -31,7 +31,7 @@ from NMDW.forms import *
    
 """
 # Initial route that loads a search and login options
-@app.route("/") 
+@app.route("/")
 def get_location():
     user = {
         'logged' : False
@@ -124,13 +124,13 @@ def register():
       db.session.commit() # change - connection.close()
       flash('Account created. You can now log in.', 'Success')
       return redirect(url_for('home'))
-   return render_template('register.html', form = form)
+   return render_template('SignUpPage.html', form = form)
 
 # dashboard route
 @app.route('/dashboard')
 @login_required
 def dashboard():
-   return render_template('dashboard.html', user = current_user)
+   return render_template('DetailedWeatherPage.html', user = current_user)
 
 # logout route
 @app.route('/logout')
@@ -170,5 +170,5 @@ def login():
          return redirect(next_page) if next_page else redirect(url_for('dashboard'))
       else:
          flash('Login failed. Check your email and password.')
-   return render_template('login.html', form=form)
+   return render_template('LoginPage.html', form=form)
 

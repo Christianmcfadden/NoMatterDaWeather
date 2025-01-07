@@ -21,7 +21,7 @@ class UserInfoForm(FlaskForm):
     fname = StringField('First Name', validators=[DataRequired()])
     lname = StringField('Last Name', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired()])
-    # add zip
+    zip = StringField('Zip Code', validators=[DataRequired(),Regexp(r'^\d{5}(-\d{4})?$', message="Enter a valid ZIP code")])
     
     password = PasswordField("password", validators=[DataRequired(),Regexp(
                 r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$',

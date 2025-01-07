@@ -12,7 +12,7 @@ File: __init__.py
 import dbm
 import os
 from sqlite3 import dbapi2
-from flask import Flask
+from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_login import LoginManager
