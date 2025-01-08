@@ -170,5 +170,5 @@ def login():
          return redirect(next_page) if next_page else redirect(url_for('dashboard'))
       else:
          flash('Login failed. Check your email and password.')
-   return render_template('LoginPage.html', form=form)
+   return render_template('LogInPage.html', form=form)
 
