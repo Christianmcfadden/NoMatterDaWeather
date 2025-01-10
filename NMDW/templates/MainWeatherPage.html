@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f4f8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: #007BFF;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: bold;
+            padding: 0.5rem 1rem;
+            background-color: #0056b3;
+            border-radius: 5px;
+        }
+
+        header a:hover {
+            background-color: #004099;
+        }
+
+        main {
+            width: 100%;
+            max-width: 1200px;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+
+        /* Weather Finder */
+        .bottom-container {
+            width: 100%;
+            padding: 1.5rem;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .bottom-container h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .bottom-container p {
+            margin-bottom: 0.5rem;
+            color: #555;
+            text-align: center;
+        }
+
+        .bottom-container form,
+        .bottom-container button {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .bottom-container input {
+            padding: 0.8rem;
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .bottom-container button {
+            padding: 0.8rem;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .bottom-container button:hover {
+            background-color: #0056b3;
+        }
+
+        .or-divider {
+            font-style: italic;
+            color: #666;
+        }
+
+        /* Main Layout */
+        section {
+            display: flex;
+            gap: 2rem;
+        }
+
+        #left, #right {
+            flex: 1;
+            padding: 1rem;
+            border-radius: 8px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #left {
+            max-width: 350px;
+        }
+
+        #right {
+            overflow-y: auto;
+            max-height: 500px;
+        }
+
+        /* Favorites */
+        .fav-city {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .fav-city h1 {
+            margin-top: 0;
+            font-size: 1.2rem;
+        }
+
+        .fav-city p {
+            margin: 0.3rem 0;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Personalized Weather Forecast</h1>
+        <a href="/logout">Logout</a>
+    </header>
+    <main>
+        <section class="bottom-container">
+            <h1>Weather Finder</h1>
+            <p>Enter your ZIP code or use your current location to get weather updates.</p>
+            <form id="zip-form" action="/set_location" method="POST">
+                <input type="text" id="zip" name="zip" placeholder="Enter ZIP Code" maxlength="5" />
+                <button type="submit">Submit</button>
+            </form>
+            <div class="or-divider">or</div>
+            <button id="location-btn" onclick="window.location.href='/current_location';">Use Current Location</button>
+        </section>
+        <section>
+            <div id="left">
+                <h1>Current City</h1>
+                <p>Temperature: {{ current.temperature }}°F</p>
+                <h1>{{ current.display }}</h1>
+                <p>Precipitation: {{ current.precip }}</p>
+                <p>{{ current.weather_descriptions }}</p>
+                <p>Feels Like: {{ current.feels_like_min }}°F - {{ current.feels_like_max }}°F</p>
+                <p>{{ current.observation_date }} @ {{ current.observation_time }}</p>
+            </div>
+            <div id="right">
+                <h1>Favorites</h1>
+                {% for city in favsList %}
+                    <div class="fav-city">
+                        <h1>{{ city.display }}</h1>
+                        <p>Temperature: {{ city.temperature }}°F</p>
+                        <p>Precipitation: {{ city.precip }}</p>
+                        <p>{{ city.weather_descriptions }}</p>
+                        <p>Feels Like: {{ city.feels_like_min }}°F - {{ city.feels_like_max }}°F</p>
+                        <p>{{ city.observation_date }} @ {{ city.observation_time }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+</body>
+</html>
