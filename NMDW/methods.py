@@ -12,6 +12,7 @@ File: Methods.py
 
 import requests
 import json
+from time import strftime, gmtime
 from datetime import datetime, timedelta
 
 # This function will take in a zip code and get the city name
