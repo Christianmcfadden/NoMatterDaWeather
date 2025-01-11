@@ -123,9 +123,13 @@
     <header>
         <h1>Personalized Weather Forecast</h1>
         {% if user.logged %}
-        <a href="/logout">Logout</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/profile">Profile</a>
+            <a href="/logout">Logout</a>
         {% else %}
-        <a href="LogInPage.html">Login</a>
+            <a href="/">Find Weather</a>
+            <a href="/login">Log In</a>
+            <a href="/register">Sign Up</a>
         {% endif %}
     </header>
     <div class="container">
@@ -142,11 +146,11 @@
             <h2>Hourly Forecast</h2>
             <div class="hourly">
                 {% for hour in city.hours %}
-                <div class="hour">
-                    <p>{{ hour.time }}</p>
-                    <p class="temp">{{ hour.temp }}°F</p>
-                    <p>{{ hour.weather_descriptions }}</p>
-                </div>
+                    <div class="hour">
+                        <p>{{ hour.hour }}{{hour.suffix}}</p>
+                        <p class="temp">{{ hour.temp }}°F</p>
+                        <p>{{ hour.weather_descriptions }}</p>
+                    </div>
                 {% endfor %}
             </div>
         </div>
@@ -168,3 +172,4 @@
 </body>
 
 </html>
+
