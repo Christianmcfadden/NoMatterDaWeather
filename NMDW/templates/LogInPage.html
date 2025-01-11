@@ -103,6 +103,12 @@
 </head>
 
 <body>
+    <header>
+        <h1>NMDW</h1>
+        <a href="/">Find Weather</a>
+        <a href="/login">Log In</a>
+        <a href="/register">Sign Up</a>
+    </header>
     <div class="wrapper">
         <form action="{{url_for('login')}}" method="post">
             {{ form.csrf_token }}
