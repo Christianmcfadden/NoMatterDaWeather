@@ -135,16 +135,87 @@ def getDates(week):
     return result[0], result[1], result[2], result[3], result[4], result[5], result[6]
 
 def milToNormal(hour):
-    return 
+    """Convert military time to normal time with AM/PM suffix."""
+    hour_value = int(hour['hour'])
+    if hour_value >= 12:
+        hour['suffix'] = 'pm'
+        if hour_value > 12:
+            hour['hour'] = hour_value - 12
+    else:
+        hour['suffix'] = 'am'
+        if hour_value == 0:
+            hour['hour'] = 12
+    return hour
 
-# i need to make the hourly forcast only show current time and on and also make the hours go from 12am to 11pm
-def createCity(weather_data, location): 
-    time = strftime("%H:%M", gmtime())
-    date = strftime("%d-%m", gmtime())
-    current_hour = strftime("%H", gmtime())
-    week = [weather_data['days'][0]['datetime'], weather_data['days'][1]['datetime'], weather_data['days'][2]['datetime'], weather_data['days'][3]['datetime'], weather_data['days'][4]['datetime'], weather_data['days'][5]['datetime'], weather_data['days'][6]['datetime']]
-    day1, day2, day3, day4, day5, day6, day7 = getDates(week)
-    city = { 
+def convert(military_time):
+    """Convert military time (HH:mm) to normal time with AM/PM suffix."""
+    hour = int(military_time[:2])  # Extract hour from military time
+    if hour >= 12:
+        suffix = 'pm'
+        if hour > 12:
+            hour -= 12
+    else:
+        suffix = 'am'
+        if hour == 0:
+            hour = 12
+    return hour, suffix
+
+def correctHour(hour):
+    """Adjust time by subtracting 5 hours for timezone correction."""
+    adjusted_time = datetime.strptime(str(hour['hour']), "%H") - timedelta(hours=5)
+    hour['hour'] = adjusted_time.strftime("%H")
+    return hour
+
+def createCity(weather_data, location):
+    # Get the current UTC time and adjust for the timezone (-5 hours)
+    current_hour_utc = int(strftime("%H", gmtime()))
+    current_minute = strftime("%M", gmtime())
+    adjusted_hour = (current_hour_utc - 5) % 24
+
+    # Convert 24-hour time to 12-hour format with AM/PM
+    def convert_to_12_hour(hour):
+        period = "AM" if hour < 12 else "PM"
+        hour_12 = hour if hour <= 12 else hour - 12
+        return hour_12, period
+
+    current_hour_12, current_period = convert_to_12_hour(adjusted_hour)
+
+    # Prepare the hours for the day
+    hours_in_day = []
+    for i in range(24):  # Iterate through 24 hours in weather data
+        hour_24 = int(weather_data['days'][0]['hours'][i]['datetime'].split(':')[0])
+        temp = round(weather_data['days'][0]['hours'][i]['temp'])
+        conditions = weather_data['days'][0]['hours'][i]['conditions']
+        hour_12, period = convert_to_12_hour(hour_24)
+
+        if (hour_24 >= adjusted_hour) or (hour_24 == adjusted_hour and int(current_minute) == 0):
+            hours_in_day.append({
+                'hour': hour_12,
+                'suffix': period,
+                'temp': temp,
+                'weather_descriptions': conditions
+            })
+
+    # Extract and process week dates
+    week_dates_original = [weather_data['days'][i]['datetime'] for i in range(7)]  # Original format
+    week_dates_formatted = [
+        datetime.strptime(date, "%Y-%m-%d").strftime("%m-%d") for date in week_dates_original
+    ]
+
+    # Format daily summaries
+    days_summary = [
+        {
+            'date': week_dates_formatted[i],  # Display format: mm-dd
+            'dOW': findDay(week_dates_original[i]),  # Original format: yyyy-mm-dd
+            'weather_descriptions': weather_data['days'][i]['conditions'],
+            'temp': round(weather_data['days'][i]['temp']),
+            'max': round(weather_data['days'][i]['tempmax']),
+            'min': round(weather_data['days'][i]['tempmin']),
+        }
+        for i in range(7)
+    ]
+
+    city = {
         'display': location['display'],
         'visibility': weather_data['days'][0]['visibility'],
         'feels_like': round(weather_data['days'][0]['feelslike']),
@@ -153,127 +224,16 @@ def createCity(weather_data, location):
         'wind_speed': weather_data['days'][0]['windspeed'],
         'weather_descriptions': weather_data['days'][0]['conditions'],
         'temperature': round(weather_data['days'][0]['temp']),
-        'observation_date': date, # format mm-dd
-        'observation_time': time, # time is 5 hours ahead 
-        'city': location['city'], 
-        'state': location['state'], 
+        'observation_date': strftime("%d-%m", gmtime()),
+        'observation_time': f"{current_hour_12}:{current_minute}{current_period}",
+        'city': location['city'],
+        'state': location['state'],
         'feels_like_min': round(weather_data['days'][0]['feelslikemin']),
         'feels_like_max': round(weather_data['days'][0]['feelslikemax']),
-        'hours':[{'time': weather_data['days'][0]['hours'][0]['datetime'],
-                  'temp': round(weather_data['days'][0]['hours'][0]['temp']),
-                  'weather_descriptions': weather_data['days'][0]['hours'][0]['conditions']},
-                  {'time': weather_data['days'][0]['hours'][1]['datetime'],
-                  'temp': round(weather_data['days'][0]['hours'][1]['temp']),
-                  'weather_descriptions': weather_data['days'][0]['hours'][1]['conditions']},
-                  {'time': weather_data['days'][0]['hours'][2]['datetime'],
-                  'temp': round(weather_data['days'][0]['hours'][2]['temp']),
-                  'weather_descriptions': weather_data['days'][0]['hours'][2]['conditions']},
-                  {'time': weather_data['days'][0]['hours'][3]['datetime'],
-                  'temp': round(weather_data['days'][0]['hours'][3]['temp']),
-                  'weather_descriptions':weather_data['days'][0]['hours'][3]['conditions']},
-                  {'time': weather_data['days'][0]['hours'][4]['datetime'],
-                  'temp': round(weather_data['days'][0]['hours'][4]['temp']),
-                  'weather_descriptions': weather_data['days'][0]['hours'][4]['conditions']},
-                  {'time': weather_data['days'][0]['hours'][5]['datetime'],
-                  'temp': round(weather_data['days'][0]['hours'][5]['temp']),
-                  'weather_descriptions': weather_data['days'][0]['hours'][5]['conditions']},
-                  {'time': weather_data['days'][0]['hours'][6]['datetime'],
-                  'temp': round(weather_data['days'][0]['hours'][6]['temp']),
-                  'weather_descriptions': weather_data['days'][0]['hours'][6]['conditions']},
-                  {'time': weather_data['days'][0]['hours'][7]['datetime'],
-                  'temp': round(weather_data['days'][0]['hours'][7]['temp']),
-                  'weather_descriptions': weather_data['days'][0]['hours'][7]['conditions']},
-                  {'time': weather_data['days'][0]['hours'][8]['datetime'],
-                  'temp': round(weather_data['days'][0]['hours'][8]['temp']),
-                  'weather_descriptions': weather_data['days'][0]['hours'][8]['conditions']},
-                  {'time': weather_data['days'][0]['hours'][9]['datetime'],
-                  'temp': round(weather_data['days'][0]['hours'][9]['temp']),
-                  'weather_descriptions': weather_data['days'][0]['hours'][9]['conditions']},
-                  {'time': weather_data['days'][0]['hours'][10]['datetime'],
-                  'temp': round(weather_data['days'][0]['hours'][10]['temp']),
-                  'weather_descriptions': weather_data['days'][0]['hours'][10]['conditions']},
-                  {'time': weather_data['days'][0]['hours'][11]['datetime'],
-                  'temp': round(weather_data['days'][0]['hours'][11]['temp']),
-                  'weather_descriptions': weather_data['days'][0]['hours'][11]['conditions']},
-                  {'time': weather_data['days'][0]['hours'][12]['datetime'],
-                  'temp': round(weather_data['days'][0]['hours'][12]['temp']),
-                  'weather_descriptions': weather_data['days'][0]['hours'][12]['conditions']},
-                  {'time': weather_data['days'][0]['hours'][13]['datetime'],
-                  'temp': round(weather_data['days'][0]['hours'][13]['temp']),
-                  'weather_descriptions': weather_data['days'][0]['hours'][13]['conditions']},
-                  {'time': weather_data['days'][0]['hours'][14]['datetime'],
-                  'temp': round(weather_data['days'][0]['hours'][14]['temp']),
-                  'weather_descriptions': weather_data['days'][0]['hours'][14]['conditions']},
-                  {'time': weather_data['days'][0]['hours'][15]['datetime'],
-                  'temp': round(weather_data['days'][0]['hours'][15]['temp']),
-                  'weather_descriptions': weather_data['days'][0]['hours'][15]['conditions']},
-                  {'time': weather_data['days'][0]['hours'][16]['datetime'],
-                  'temp': round(weather_data['days'][0]['hours'][16]['temp']),
-                  'weather_descriptions': weather_data['days'][0]['hours'][16]['conditions']},
-                  {'time': weather_data['days'][0]['hours'][17]['datetime'],
-                  'temp': round(weather_data['days'][0]['hours'][17]['temp']),
-                  'weather_descriptions': weather_data['days'][0]['hours'][17]['conditions']},
-                  {'time': weather_data['days'][0]['hours'][18]['datetime'],
-                  'temp': round(weather_data['days'][0]['hours'][18]['temp']),
-                  'weather_descriptions': weather_data['days'][0]['hours'][18]['conditions']},
-                  {'time': weather_data['days'][0]['hours'][19]['datetime'],
-                  'temp': round(weather_data['days'][0]['hours'][19]['temp']),
-                  'weather_descriptions': weather_data['days'][0]['hours'][19]['conditions']},
-                  {'time': weather_data['days'][0]['hours'][20]['datetime'],
-                  'temp': round(weather_data['days'][0]['hours'][20]['temp']),
-                  'weather_descriptions': weather_data['days'][0]['hours'][20]['conditions']},
-                  {'time': weather_data['days'][0]['hours'][21]['datetime'],
-                  'temp': round(weather_data['days'][0]['hours'][21]['temp']),
-                  'weather_descriptions': weather_data['days'][0]['hours'][21]['conditions']},
-                  {'time': weather_data['days'][0]['hours'][22]['datetime'],
-                  'temp': round(weather_data['days'][0]['hours'][22]['temp']),
-                  'weather_descriptions': weather_data['days'][0]['hours'][22]['conditions']},
-                  {'time': weather_data['days'][0]['hours'][23]['datetime'],
-                  'temp': round(weather_data['days'][0]['hours'][23]['temp']),
-                  'weather_descriptions': weather_data['days'][0]['hours'][23]['conditions']},],
-        'days':[{'date': day1,
-                 'dOW': findDay(weather_data['days'][0]['datetime']),
-                 'weather_descriptions': weather_data['days'][0]['conditions'],
-                 'temp': round(weather_data['days'][0]['temp']),
-                 'max': round(weather_data['days'][0]['tempmax']),
-                 'min': round(weather_data['days'][0]['tempmin'])},
-                 {'date': day2,
-                 'dOW': findDay(weather_data['days'][1]['datetime']),
-                 'weather_descriptions': weather_data['days'][1]['conditions'],
-                 'temp': round(weather_data['days'][1]['temp']),
-                 'max': round(weather_data['days'][1]['tempmax']),
-                 'min': round(weather_data['days'][1]['tempmin'])},
-                 {'date': day3,
-                 'dOW': findDay(weather_data['days'][2]['datetime']),
-                 'weather_descriptions': weather_data['days'][2]['conditions'],
-                 'temp': round(weather_data['days'][2]['temp']),
-                 'max': round(weather_data['days'][2]['tempmax']),
-                 'min': round(weather_data['days'][2]['tempmin'])},
-                 {'date': day4,
-                 'dOW': findDay(weather_data['days'][3]['datetime']),
-                 'weather_descriptions': weather_data['days'][3]['conditions'],
-                 'temp': round(weather_data['days'][3]['temp']),
-                 'max': round(weather_data['days'][3]['tempmax']),
-                 'min': round(weather_data['days'][3]['tempmin'])},
-                 {'date': day5,
-                 'dOW': findDay(weather_data['days'][4]['datetime']),
-                 'weather_descriptions': weather_data['days'][4]['conditions'],
-                 'temp': round(weather_data['days'][4]['temp']),
-                 'max': round(weather_data['days'][4]['tempmax']),
-                 'min': round(weather_data['days'][4]['tempmin'])},
-                 {'date': day6,
-                 'dOW': findDay(weather_data['days'][5]['datetime']),
-                 'weather_descriptions': weather_data['days'][5]['conditions'],
-                 'temp': round(weather_data['days'][5]['temp']),
-                 'max': round(weather_data['days'][5]['tempmax']),
-                 'min': round(weather_data['days'][5]['tempmin'])},
-                 {'date': day7,
-                 'dOW': findDay(weather_data['days'][6]['datetime']),
-                 'weather_descriptions': weather_data['days'][6]['conditions'],
-                 'temp': round(weather_data['days'][6]['temp']),
-                 'max': round(weather_data['days'][6]['tempmax']),
-                 'min': round(weather_data['days'][6]['tempmin'])}]
+        'hours': hours_in_day,
+        'days': days_summary,
     }
+
     return city
 
 """
