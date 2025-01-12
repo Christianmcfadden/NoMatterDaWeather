@@ -20,16 +20,7 @@ import json #NEW
 from werkzeug.utils import secure_filename
 from NMDW.methods import *
 from NMDW.forms import *
-"""
-# home route
-@app.route('/')
-   def home():
-      if current_user.is_authenticated:
-         return redirect(url_for('dashboard'))
-      login_form = LoginForm()
-      return render_template("login.html", form = login_form)
-   
-"""
+
 # Initial route that loads a search and login options
 @app.route("/")
 def get_location():
@@ -63,12 +54,12 @@ def get_zip():
         if locationData['zip'] == "":
             locationData = get_geolocal()
             weatherData, locationData = get_weather(locationData)
-            city = createCity(weatherData)
-            return render_template("DetailedWeatherPage.html", locationData=locationData, city=city, user=user)
+            city = createCity(weatherData, locationData) # Add location
+            return render_template("DetailedWeatherPage.html", city=city, user=user) # Remove location 
         else:
             weatherData, locationData = get_weather(locationData)
-            city = createCity(weatherData)
-            return render_template("DetailedWeatherPage.html", locationData=locationData, city=city, user=user)
+            city = createCity(weatherData, locationData) # Add location
+            return render_template("DetailedWeatherPage.html", city=city, user=user) # Remove location 
     else:
         locationData = {
                 'current_city' : f"{zip}",
@@ -78,8 +69,8 @@ def get_zip():
                 'lat' : ""
         }
         weatherData, locationData = get_weather(locationData) 
-        city = createCity(weatherData)
-        return render_template("DetailedWeatherPage.html", locationData=locationData, city=city, user=user)
+        city = createCity(weatherData, locationData) # Add location
+        return render_template("DetailedWeatherPage.html", city=city, user=user) # Remove location 
 
 # This route gets a users current location
 @app.route('/current_location')
@@ -89,8 +80,8 @@ def getCurrentLocal():
     locationData = get_geolocal()
     if locationData:
         weatherData, locationData = get_weather(locationData)
-        city = createCity(weatherData)
-        return render_template("DetailedWeatherPage.html", locationData=locationData, city=city, user=user)
+        city = createCity(weatherData, locationData) # Add location
+        return render_template("DetailedWeatherPage.html", city=city, user=user) # Remove location 
     else:
         return render_template("FindLocalWeatherPage.html", user=user)
 
@@ -113,6 +104,11 @@ def find():
 # registration route
 @app.route('/register', methods = ['GET', 'POST'])
 def register():
+    form = UserInfoForm()
+    return render_template('register.html', form = form)
+
+@app.route('/validate_register', methods = ['GET', 'POST'])
+def validate_register():
    if current_user.is_authenticated:
       return redirect(url_for('dashboard'))
    # this form is from forms.py
@@ -123,14 +119,24 @@ def register():
       db.session.add(user) # change - use connection =, pass paramter, fname,lname,zip
       db.session.commit() # change - connection.close()
       flash('Account created. You can now log in.', 'Success')
-      return redirect(url_for('home'))
-   return render_template('SignUpPage.html', form = form)
+      return redirect(url_for('dashboard')) # load page with favs
+   return render_template('register.html', form = form)
 
 # dashboard route
-@app.route('/dashboard')
-@login_required
+@app.route('/dashboard') # dashboard
+# @login_required
 def dashboard():
-   return render_template('DetailedWeatherPage.html', user = current_user)
+    favsList = []
+    locationData = get_geolocal() # Current Location 
+    weatherData, locationData = get_weather(locationData)
+    current = createCity(weatherData, locationData) # Storing current location weather
+    favs = [] # Pull favs from db 12542, 28328, 28303, 10010
+    for zip in favs:
+        location = get_location_data(zip) # Getting location info for favs
+        weatherData, location = get_weather(location)
+        city = createCity(weatherData, location)
+        favsList.append(city)
+    return render_template('MainWeatherPage.html', current=current, favsList=favsList)
 
 # logout route
 @app.route('/logout')
@@ -157,7 +163,12 @@ def profile():
 
 # route to login
 @app.route('/login', methods = ['GET', 'POST'])
-def login():
+def login(): 
+    form = LoginForm()
+    return render_template('LogInPage.html', form=form)
+
+@app.route('/validate_login', methods = ['GET', 'POST'])
+def validate_login():
    if current_user.is_authenticated: # logged in users get sent to dashboard
       return redirect(url_for('dashboard'))
    form = LoginForm()
@@ -171,4 +182,3 @@ def login():
       else:
          flash('Login failed. Check your email and password.')
    return render_template('LogInPage.html', form=form)
-
