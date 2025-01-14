@@ -114,7 +114,7 @@ def validate_register():
    # this form is from forms.py
    form = UserInfoForm()
    if form.validate_on_submit():
-      hashed_password = bcrypt.generate_password_hash(form.password.data).decode('urf-8')
+      hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
       user = User(username = form.username.data, email = form.email.data, password = hashed_password)
       db.session.add(user) # change - use connection =, pass paramter, fname,lname,zip
       db.session.commit() # change - connection.close()
