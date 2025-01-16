@@ -105,7 +105,7 @@ def find():
 @app.route('/register', methods = ['GET', 'POST'])
 def register():
     form = UserInfoForm()
-    return render_template('register.html', form = form)
+    return render_template('SignUpPage.html', form = form)
 
 @app.route('/validate_register', methods = ['GET', 'POST'])
 def validate_register():
